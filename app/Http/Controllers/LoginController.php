@@ -22,26 +22,33 @@ class LoginController extends Controller
         $credentials = $request->only('email', 'password');
 
         $validator = Validator::make($credentials, [
-            'email' => 'required|regex:/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/|exists:users|max:100',
+            'email' => 'required|regex:/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/|max:100',
             'password' => 'required|string|min:6|max:45',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
+            return response()->json([ 
+                'status' => 'failure',
+                'message' => 'login failed',
+                'error' => $validator->errors()
+            ], 401);
         }
-        // $email = $request->input('email');
-        // $user = DB::table('users')
-        //         ->where('email', '=', $email)
-        //         ->first();
+        $email = $request->input('email');
+        $user = DB::table('users')
+                ->where('email', '=', $email)
+                ->first();
         // if(!$user){
         //     return response()->json(['Failure'=> 'User not Found'],404);
         // } 
 
         if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Incorrect password'], 401);
+            return response()->json([ 
+                'status' => 'failure',
+                'message' => 'incorrect credentials'
+            ], 401);
         }
 
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token, $user);
     }
 
     public function logout()
@@ -50,7 +57,9 @@ class LoginController extends Controller
         auth()->logout();
 
 
-        return response()->json(['message' => 'User successfully logged out.']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'user successfully logged out.']);
     }
 
     public function forgotpassword(Request $request)
@@ -97,7 +106,11 @@ class LoginController extends Controller
       
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            return response()->json([ 
+                'status' => 'failure',
+                'message' => 'registration failed',
+                'error' => $validator->errors()
+            ], 400);
         }
 
         
@@ -114,23 +127,25 @@ class LoginController extends Controller
         if($user){
             unset($user->created_at,$user->updated_at);
         return response()->json([
-            'success' => true,
-            'message' => 'User Added successfully',
+            'success' => 'success',
+            'message' => 'user added successfully',
             'data' => $user
         ], Response::HTTP_CREATED);
         }else{
             return response()->json([
-                'success' => false,
-                'message' => 'User not added',
+                'success' => 'failure',
+                'message' => 'user not added',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
 
-    protected function respondWithToken($token)
+    protected function respondWithToken($token , $user)
     {
+        unset($user->created_at,$user->updated_at);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
+            'data' => $user,
             // 'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }

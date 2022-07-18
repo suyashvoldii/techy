@@ -1,13 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\AddRoleController;
+use App\Http\Controllers\OrderController;
 
 Route::post('login', [LoginController::class, 'login']);
 //Route::post('role',[AddRoleController::class,'addrole']);
@@ -21,7 +18,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     //Company controller
     Route::resource('product', ProductController::class);
-
+    Route::resource('order', OrderController::class);
     //User controoler
     Route::resource('users', UserController::class);
     Route::get('supervisor', [UserController::class, 'supervisorlist']);

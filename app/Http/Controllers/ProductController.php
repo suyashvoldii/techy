@@ -59,7 +59,11 @@ class ProductController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            return response()->json([ 
+                'status' => 'failure',
+                'message' => 'product not added',
+                'error' => $validator->errors()
+            ], 400);
         }
 
         //Request is valid, create new user
@@ -72,7 +76,7 @@ class ProductController extends Controller
         //User created, return success response
         return response()->json([
             'status' => 'success',
-            'message' => 'product created successfully',
+            'message' => 'product created',
             'data' => $company
         ], Response::HTTP_CREATED);
     }
@@ -85,16 +89,22 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-          // $company = Company::find($company_id);
           $company = DB::table('products')
           ->where('product_id', '=', $id)
           ->first();
-          
-          if($company)
-              return $company;
+          unset($company->updated_at);
+          if($company){
+            return response()->json([
+                'status'=> 'success',
+                'message' => 'product found',
+                'data' => $company,
+            ],Response::HTTP_OK);
+          }
           else{
               return response()->json([
-                  'Failure'=> 'NO Companies Found'
+                'status'=> 'failure',
+                'message' => 'product not found',
+                'data' => $company?:[],
               ],Response::HTTP_OK);
           }
     }
@@ -181,15 +191,15 @@ class ProductController extends Controller
         $company = Product::find($id);
         if(!$company){
             return response()->json([
-                'success' => false,
-                'message' => 'Company Not Found',
-            ], Response::HTTP_NOT_FOUND);  
+                'success' => 'failure',
+                'message' => 'product not found',
+            ], Response::HTTP_OK);  
         }
         $deleted = $company->delete();
         if($deleted){
             return response()->json([
-                'success' => true,
-                'message' => 'Company Deleted successfully',
+                'success' => 'success',
+                'message' => 'product deleted',
             ], Response::HTTP_OK);  
         }
     }

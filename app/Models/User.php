@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable,SoftDeletes;
+    use HasFactory, Notifiable;
 
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'user_id';
     /**
      * The attributes that are mass assignable.
      *
