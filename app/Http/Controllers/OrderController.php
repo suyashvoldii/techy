@@ -80,7 +80,21 @@ class OrderController extends Controller
     public function show($id)
     {
         $company = Order::all();
-        return $company;
+        // return $company;
+        if($company){
+            return response()->json([
+                'status' => 'success',
+                'message' => 'order found',
+                'data' => $company
+            ], Response::HTTP_OK);
+        } else {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'order not found',
+                'data' => $company
+            ], Response::HTTP_OK);
+        }
+        
     }
 
     /**
